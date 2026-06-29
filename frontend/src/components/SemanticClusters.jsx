@@ -4,7 +4,7 @@ import TaskCard from './TaskCard';
 const SemanticClusters = ({ tasks }) => {
     if (!tasks || tasks.length === 0) {
         return (
-            <div className="glass-panel p-8 w-full flex items-center justify-center h-64 text-gray-400 italic">
+            <div className="glass-card p-8 w-full flex items-center justify-center h-64 text-on-surface-variant italic rounded-2xl">
                 No active tasks. Awaiting input...
             </div>
         );
@@ -21,17 +21,17 @@ const SemanticClusters = ({ tasks }) => {
     const clusters = Object.keys(groupedTasks);
 
     return (
-        <div className="w-full flex gap-6 overflow-x-auto pb-4 snap-x">
+        <div className="w-full flex gap-6 overflow-x-auto pb-6 snap-x">
             {clusters.map((clusterName, idx) => (
-                <div key={idx} className="glass-panel p-4 flex-1 min-w-[280px] max-w-[350px] snap-center flex flex-col h-[500px]">
-                    <div className="mb-4 pb-3 border-b border-gray-700 flex justify-between items-center">
-                        <h3 className="text-lg font-bold text-gray-200 tracking-wide">{clusterName}</h3>
-                        <span className="bg-gray-700 text-xs py-1 px-2 rounded-full text-gray-300">
-                            {groupedTasks[clusterName].length}
+                <div key={idx} className="glass-card p-5 flex-1 min-w-[320px] max-w-[400px] snap-center flex flex-col h-[550px] rounded-2xl border-t-4 border-t-primary/50 hover:border-t-primary transition-colors">
+                    <div className="mb-6 pb-4 border-b border-border-subtle/50 flex justify-between items-center">
+                        <h3 className="font-metric text-metric text-on-surface tracking-wide">{clusterName}</h3>
+                        <span className="bg-surface-container-highest font-label-caps text-[10px] py-1 px-3 rounded-full text-on-surface-variant tracking-widest">
+                            {groupedTasks[clusterName].length} NODES
                         </span>
                     </div>
                     
-                    <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto pr-2 flex flex-col gap-3 custom-scrollbar">
                         {groupedTasks[clusterName].map((task, taskIdx) => (
                             <TaskCard key={taskIdx} task={task} />
                         ))}

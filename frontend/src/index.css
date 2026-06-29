@@ -1,17 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap');
+
 @import "tailwindcss";
+@config "../tailwind.config.js";
 
 @layer base {
+  :root {
+    --color-background: #f9f9f9;
+    --color-surface-card: #FCFCFB;
+    --color-surface-container-highest: #e2e2e2;
+    --color-on-surface-variant: #4c4546;
+    --color-on-secondary-container: #626262;
+    --color-surface-dim: #dadada;
+    --color-surface-container-high: #e8e8e8;
+    --color-accent-blue: #3B82F6;
+    --color-on-secondary: #ffffff;
+    --color-primary: #000000;
+    --color-tertiary-fixed: #e2e2e2;
+    --color-surface: #f9f9f9;
+    --color-surface-panel: #F3F2EF;
+    --color-on-error: #ffffff;
+    --color-accent-emerald: #10B981;
+    --color-on-secondary-fixed-variant: #464747;
+    --color-surface-container: #eeeeee;
+    --color-error-container: #ffdad6;
+    --color-background-warm: #F7F7F5;
+    --color-inverse-primary: #c6c6c6;
+    --color-accent-purple: #A855F7;
+    --color-primary-fixed: #e2e2e2;
+    --color-surface-tint: #5e5e5e;
+    --color-tertiary: #000000;
+    --color-on-primary-fixed-variant: #474747;
+    --color-secondary: #5e5e5e;
+    --color-on-surface: #1b1b1b;
+    --color-on-primary-container: #848484;
+    --color-primary-fixed-dim: #c6c6c6;
+    --color-secondary-fixed: #e4e2e2;
+    --color-on-tertiary-container: #848484;
+    --color-on-primary-fixed: #1b1b1b;
+    --color-primary-container: #1b1b1b;
+    --color-tertiary-fixed-dim: #c6c6c6;
+    --color-tertiary-container: #1b1b1b;
+    --color-inverse-surface: #303030;
+    --color-secondary-container: #e1dfdf;
+    --color-on-background: #1b1b1b;
+    --color-on-tertiary: #ffffff;
+    --color-on-secondary-fixed: #1b1c1c;
+    --color-on-tertiary-fixed: #1b1b1b;
+    --color-on-error-container: #93000a;
+    --color-on-tertiary-fixed-variant: #474747;
+    --color-border-subtle: #E7E7E4;
+    --color-outline-variant: #cfc4c5;
+    --color-outline: #7e7576;
+    --color-on-primary: #ffffff;
+    --color-inverse-on-surface: #f1f1f1;
+    --color-surface-container-lowest: #ffffff;
+    --color-surface-bright: #f9f9f9;
+    --color-surface-variant: #e2e2e2;
+    --color-error: #ba1a1a;
+    --color-surface-container-low: #f3f3f3;
+  }
+
+  .dark {
+    --color-background: #141313;
+    --color-surface-card: #1c1b1b;
+    --color-surface-container-highest: #353434;
+    --color-on-surface-variant: #c4c7c8;
+    --color-on-secondary-container: #b8b8b8;
+    --color-surface-dim: #141313;
+    --color-surface-container-high: #2a2a2a;
+    --color-accent-blue: #3B82F6;
+    --color-on-secondary: #2f3131;
+    --color-primary: #ffffff;
+    --color-tertiary-fixed: #e2e2e2;
+    --color-surface: #141313;
+    --color-surface-panel: #201f1f;
+    --color-on-error: #690005;
+    --color-accent-emerald: #10B981;
+    --color-on-secondary-fixed-variant: #464747;
+    --color-surface-container: #201f1f;
+    --color-error-container: #93000a;
+    --color-background-warm: #0e0e0e;
+    --color-inverse-primary: #5d5f5f;
+    --color-accent-purple: #A855F7;
+    --color-primary-fixed: #e2e2e2;
+    --color-surface-tint: #c6c6c7;
+    --color-tertiary: #ffffff;
+    --color-on-primary-fixed-variant: #454747;
+    --color-secondary: #c7c6c6;
+    --color-on-surface: #e5e2e1;
+    --color-on-primary-container: #636565;
+    --color-primary-fixed-dim: #c6c6c7;
+    --color-secondary-fixed: #e3e2e2;
+    --color-on-tertiary-container: #636565;
+    --color-on-primary-fixed: #1a1c1c;
+    --color-primary-container: #e2e2e2;
+    --color-tertiary-fixed-dim: #c6c6c7;
+    --color-tertiary-container: #e2e2e2;
+    --color-inverse-surface: #e5e2e1;
+    --color-secondary-container: #484949;
+    --color-on-background: #e5e2e1;
+    --color-on-tertiary: #2f3131;
+    --color-on-secondary-fixed: #1a1c1c;
+    --color-on-tertiary-fixed: #1a1c1c;
+    --color-on-error-container: #ffdad6;
+    --color-on-tertiary-fixed-variant: #454747;
+    --color-border-subtle: #353434;
+    --color-outline-variant: #444748;
+    --color-outline: #8e9192;
+    --color-on-primary: #2f3131;
+    --color-inverse-on-surface: #313030;
+    --color-surface-container-lowest: #0e0e0e;
+    --color-surface-bright: #3a3939;
+    --color-surface-variant: #353434;
+    --color-error: #ffb4ab;
+    --color-surface-container-low: #1c1b1b;
+  }
+
   body {
-    @apply bg-gray-900 text-gray-100 antialiased;
+    @apply bg-background text-on-surface font-body-md min-h-screen overflow-x-hidden;
   }
 }
 
 @layer utilities {
-  .glass-panel {
-    @apply bg-gray-800/50 backdrop-blur-md border border-gray-700 rounded-xl shadow-xl;
+  .glass-card {
+    background-color: var(--color-surface);
+    opacity: 0.8;
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--color-border-subtle);
+    transition: all 0.3s ease;
+  }
+  .dark .glass-card {
+    background-color: rgba(20, 19, 19, 0.4);
+    border: 0.5px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-card:hover {
+    border-color: var(--color-primary);
+  }
+  .dark .glass-card:hover {
+    background-color: rgba(58, 57, 57, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Scrollbar override */
+  ::-webkit-scrollbar {
+      width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+      background: var(--color-background);
+  }
+  ::-webkit-scrollbar-thumb {
+      background: var(--color-surface-container-highest);
+      border-radius: 10px;
   }
   
-  .animate-pulse-slow {
-    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      z-index: -1;
+      opacity: 0.15;
+      transition: transform 10s ease-in-out;
+  }
+  
+  .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 8px;
+      animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
   }
 }

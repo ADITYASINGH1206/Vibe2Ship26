@@ -22,12 +22,12 @@ const InputBar = ({ onAnalyze, loadingPhase }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="w-full max-w-4xl mx-auto mb-8 bg-gray-800/80 p-4 rounded-2xl border border-gray-700 shadow-xl backdrop-blur-md">
-            <div className="flex flex-col md:flex-row gap-4 mb-4">
+        <form onSubmit={handleSubmit} className="w-full max-w-4xl mx-auto mb-8 glass-card p-6 rounded-2xl flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 relative">
                     <input
                         type="text"
-                        className="w-full bg-gray-900 text-white border border-gray-700 rounded-xl py-3 pl-4 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder-gray-500"
+                        className="w-full bg-surface-container-low text-on-surface border border-border-subtle rounded-xl py-3 pl-4 pr-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body-md"
                         placeholder="Dump your task thoughts here (e.g., 'Chemistry paper due Friday')..."
                         value={text}
                         onChange={(e) => setText(e.target.value)}
@@ -35,24 +35,24 @@ const InputBar = ({ onAnalyze, loadingPhase }) => {
                     />
                 </div>
                 
-                <div className="flex gap-2">
-                    <div className="relative flex items-center bg-gray-900 border border-gray-700 rounded-xl px-3 focus-within:ring-2 focus-within:ring-blue-500 transition-all">
-                        <Tag className="w-4 h-4 text-gray-400 mr-2" />
+                <div className="flex gap-4">
+                    <div className="relative flex items-center bg-surface-container-low border border-border-subtle rounded-xl px-4 focus-within:border-primary transition-all">
+                        <Tag className="w-4 h-4 text-on-surface-variant mr-2" />
                         <select 
                             value={category}
                             onChange={(e) => setCategory(e.target.value)}
                             disabled={isLoading}
-                            className="bg-transparent text-gray-300 py-3 focus:outline-none appearance-none pr-4 cursor-pointer"
+                            className="bg-transparent text-on-surface font-body-md py-3 focus:outline-none appearance-none pr-4 cursor-pointer"
                         >
-                            <option value="Work">Work</option>
-                            <option value="Personal">Personal</option>
-                            <option value="Urgent">Urgent</option>
-                            <option value="Errands">Errands</option>
+                            <option value="Work" className="bg-surface text-on-surface">Work</option>
+                            <option value="Personal" className="bg-surface text-on-surface">Personal</option>
+                            <option value="Urgent" className="bg-surface text-on-surface">Urgent</option>
+                            <option value="Errands" className="bg-surface text-on-surface">Errands</option>
                         </select>
                     </div>
 
-                    <div className="relative flex items-center bg-gray-900 border border-gray-700 rounded-xl px-3 focus-within:ring-2 focus-within:ring-blue-500 transition-all">
-                        <Calendar className="w-4 h-4 text-gray-400 mr-2" />
+                    <div className="relative flex items-center bg-surface-container-low border border-border-subtle rounded-xl px-4 focus-within:border-primary transition-all z-50">
+                        <Calendar className="w-4 h-4 text-on-surface-variant mr-2" />
                         <DatePicker
                             selected={targetDeadline}
                             onChange={(date) => setTargetDeadline(date)}
@@ -63,7 +63,7 @@ const InputBar = ({ onAnalyze, loadingPhase }) => {
                             dateFormat="MMMM d, yyyy h:mm aa"
                             placeholderText="Target Deadline..."
                             disabled={isLoading}
-                            className="bg-transparent text-gray-300 py-3 focus:outline-none cursor-pointer w-48"
+                            className="bg-transparent text-on-surface font-body-md py-3 focus:outline-none cursor-pointer w-48"
                         />
                     </div>
                 </div>
@@ -72,16 +72,16 @@ const InputBar = ({ onAnalyze, loadingPhase }) => {
             <button
                 type="submit"
                 disabled={!text.trim() || isLoading}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg"
+                className="w-full py-4 bg-primary hover:bg-primary/90 text-background rounded-xl font-metric text-md tracking-wide transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mt-2"
             >
                 {isLoading ? (
                     <>
-                        <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                        <Loader2 className="w-5 h-5 animate-spin mr-3" />
                         {loadingPhase}
                     </>
                 ) : (
                     <>
-                        <Send className="w-5 h-5 mr-2" />
+                        <Send className="w-5 h-5 mr-3" />
                         Analyze & Schedule Task
                     </>
                 )}
