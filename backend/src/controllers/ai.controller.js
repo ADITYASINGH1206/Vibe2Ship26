@@ -5,7 +5,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const generatePlan = async (req, res) => {
     try {
-        const { taskDescription } = req.body;
+        const { taskDescription, category, targetDeadline } = req.body;
 
         if (!taskDescription) {
             return res.status(400).json({ error: 'Task description is required' });
@@ -13,21 +13,25 @@ const generatePlan = async (req, res) => {
 
         let parsedData;
         try {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-preview" });
             const prompt = `
-            You are a proactive productivity agent. Analyze the following vague task description:
+            You are a proactive productivity agent coordinating a calendar.
+            Analyze the following task description:
             "${taskDescription}"
-
-            1. Identify the core objective and the hard deadline.
-            2. Break the objective down into a series of actionable micro-tasks.
-            3. Estimate the duration (in minutes) for each micro-task.
             
-            Respond ONLY with a valid JSON object in this exact format:
+            User Category: ${category || 'Uncategorized'}
+            Target Deadline: ${targetDeadline ? new Date(targetDeadline).toISOString() : 'None provided (extrapolate a reasonable deadline)'}
+
+            Instructions:
+            1. Break the objective down into actionable micro-tasks.
+            2. Schedule each micro-task by assigning a realistic 'startTime' (ISO format) and 'durationMinutes'. Ensure they fit before the deadline and don't overlap. Use the current time as a baseline: ${new Date().toISOString()}.
+
+            Respond ONLY with a valid JSON object in this EXACT format:
             {
                 "objective": "...",
                 "deadline": "YYYY-MM-DDTHH:MM:SSZ",
                 "microTasks": [
-                    { "title": "...", "durationMinutes": 30 }
+                    { "title": "...", "startTime": "YYYY-MM-DDTHH:MM:SSZ", "durationMinutes": 30 }
                 ]
             }
             `;
@@ -41,42 +45,36 @@ const generatePlan = async (req, res) => {
         } catch (apiError) {
             console.error("Gemini API Error (Fallback Triggered):", apiError.message);
             // Fallback mock data for demo purposes when API key is restricted/invalid
+            const nowMs = Date.now();
             parsedData = {
-                objective: "Complete Chemistry Research Paper",
-                deadline: new Date(Date.now() + 86400000).toISOString(),
+                objective: `[${category || 'Task'}] ` + taskDescription.substring(0, 30) + '...',
+                deadline: targetDeadline ? new Date(targetDeadline).toISOString() : new Date(nowMs + 86400000).toISOString(),
                 microTasks: [
-                    { title: "Outline the thermodynamics structure", durationMinutes: 30 },
-                    { title: "Draft introduction and abstract", durationMinutes: 45 },
-                    { title: "Compile chemical equations and references", durationMinutes: 60 }
+                    { title: "Review requirements and category constraints", startTime: new Date(nowMs + 3600000).toISOString(), durationMinutes: 30 },
+                    { title: "Draft initial execution structure", startTime: new Date(nowMs + 7200000).toISOString(), durationMinutes: 60 },
+                    { title: "Finalize deliverables", startTime: new Date(nowMs + 14400000).toISOString(), durationMinutes: 30 }
                 ]
             };
         }
 
-        // 2. Interrogate Calendar API (Mocking this interaction for the skeleton)
-        // In reality, this would use googleapis (calendar.events.freeBusy)
-        console.log("Interrogating Google Calendar for available time blocks...");
-        const availableBlocks = [
-            { start: new Date(Date.now() + 3600000), end: new Date(Date.now() + 7200000) }, // +1 hr to +2 hr
-            { start: new Date(Date.now() + 10800000), end: new Date(Date.now() + 14400000) } // +3 hr to +4 hr
-        ];
+        // Override deadline if user provided a target deadline explicitly
+        if (targetDeadline) {
+            parsedData.deadline = new Date(targetDeadline).toISOString();
+        }
 
-        // 3. Autonomously schedule micro-tasks
-        const scheduledTasks = parsedData.microTasks.map((task, index) => {
-            // Simplistic scheduling logic for demonstration
-            const block = availableBlocks[index % availableBlocks.length];
-            return {
-                ...task,
-                scheduledStart: block.start,
-                scheduledEnd: new Date(block.start.getTime() + task.durationMinutes * 60000)
-            };
-        });
+        const scheduledTasks = parsedData.microTasks.map(task => ({
+            ...task,
+            scheduledStart: task.startTime,
+            scheduledEnd: new Date(new Date(task.startTime).getTime() + (task.durationMinutes * 60000)).toISOString()
+        }));
 
-        // 4. Phase 2: Machine Learning Intelligence Layer (Real ML Microservice call)
+        // Phase 2: Machine Learning Intelligence Layer (Real ML Microservice call)
         console.log("Sending tasks to ML engine for context clustering and risk assessment...");
         
         let mlEnrichedTasks = scheduledTasks;
         let totalRisk = 0;
         let interventionTriggered = false;
+        let nextNudgeTime = null;
 
         try {
             const mlResponse = await fetch(`${process.env.ML_ENGINE_URL}/analyze`, {
@@ -92,14 +90,8 @@ const generatePlan = async (req, res) => {
                 const mlData = await mlResponse.json();
                 mlEnrichedTasks = mlData.data.tasks;
                 totalRisk = mlData.data.analytics.riskOfFailure;
-
-                if (totalRisk > 0.8) {
-                    console.warn(`⚠️ High Risk of Failure detected (${(totalRisk * 100).toFixed(1)}%). Triggering proactive intervention sequence.`);
-                    interventionTriggered = true;
-                }
             } else {
                 console.error("ML Engine returned an error:", await mlResponse.text());
-                // Fallback risk calculation if ML engine fails
                 totalRisk = 0.5; 
             }
         } catch (mlError) {
@@ -107,17 +99,36 @@ const generatePlan = async (req, res) => {
             totalRisk = 0.5;
         }
 
-        res.status(200).json({
-            status: 'success',
-            data: {
-                objective: parsedData.objective,
-                deadline: parsedData.deadline,
-                scheduledTasks: mlEnrichedTasks,
-                analytics: {
-                    averageRiskScore: totalRisk,
-                    interventionTriggered: interventionTriggered
-                }
+        // Check if intervention is needed
+        if (totalRisk > 0.7) {
+            console.warn(`⚠️ High Risk of Failure detected (${(totalRisk * 100).toFixed(1)}%). Triggering proactive intervention sequence.`);
+            interventionTriggered = true;
+            
+            const deadlineMs = new Date(parsedData.deadline).getTime();
+            const nowMs = Date.now();
+            if (deadlineMs > nowMs) {
+                const twoHoursBefore = deadlineMs - (2 * 60 * 60 * 1000);
+                const halfway = nowMs + ((deadlineMs - nowMs) / 2);
+                nextNudgeTime = new Date(Math.min(twoHoursBefore, halfway)).toISOString();
+            } else {
+                nextNudgeTime = new Date(nowMs + 900000).toISOString();
             }
+        }
+
+        // Enforce the strict JSON response format requested by the user
+        res.status(200).json({
+            microTasks: mlEnrichedTasks.map(t => ({
+                title: t.title,
+                startTime: t.scheduledStart,
+                duration: t.durationMinutes.toString()
+            })),
+            riskScore: totalRisk,
+            category: category || "Uncategorized",
+            
+            // Keeping auxiliary data that powers existing UI features gracefully
+            objective: parsedData.objective,
+            interventionTriggered: interventionTriggered,
+            nextNudgeTime: nextNudgeTime
         });
 
     } catch (error) {

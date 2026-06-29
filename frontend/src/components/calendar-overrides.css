@@ -1,0 +1,61 @@
+/* Dark theme overrides for react-big-calendar */
+.rbc-calendar {
+    color: #e5e7eb; /* Tailwind gray-200 */
+}
+
+.rbc-month-view, .rbc-time-view, .rbc-agenda-view {
+    background-color: #1f2937; /* Tailwind gray-800 */
+    border-color: #374151; /* Tailwind gray-700 */
+    border-radius: 0.5rem;
+}
+
+.rbc-header {
+    border-color: #374151 !important;
+    padding: 8px 0;
+    font-weight: 600;
+}
+
+.rbc-off-range-bg {
+    background-color: #111827; /* Tailwind gray-900 */
+}
+
+.rbc-today {
+    background-color: #374151 !important; /* Tailwind gray-700 */
+}
+
+.rbc-day-bg + .rbc-day-bg, .rbc-month-row + .rbc-month-row, .rbc-time-content > * + * > * {
+    border-color: #374151 !important;
+}
+
+.rbc-event {
+    background-color: #3b82f6 !important; /* Tailwind blue-500 */
+    border: none !important;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+.rbc-event:hover {
+    background-color: #2563eb !important; /* Tailwind blue-600 */
+}
+
+.rbc-toolbar button {
+    color: #e5e7eb !important;
+    border-color: #4b5563 !important; /* Tailwind gray-600 */
+}
+
+.rbc-toolbar button:hover, .rbc-toolbar button:active, .rbc-toolbar button.rbc-active {
+    background-color: #4b5563 !important;
+    color: white !important;
+}
+
+.rbc-time-header-content {
+    border-color: #374151 !important;
+}
+
+.rbc-timeslot-group {
+    border-color: #374151 !important;
+}
+
+.rbc-time-gutter {
+    color: #9ca3af; /* Tailwind gray-400 */
+}
