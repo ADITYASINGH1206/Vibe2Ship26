@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import format from 'date-fns/format';
 import parse from 'date-fns/parse';
@@ -21,6 +21,9 @@ const localizer = dateFnsLocalizer({
 });
 
 const CalendarView = ({ tasks }) => {
+    const [view, setView] = useState('week');
+    const [date, setDate] = useState(new Date());
+
     // Map tasks to react-big-calendar events
     const events = tasks.map(task => {
         const start = new Date(task.startTime);
@@ -44,7 +47,10 @@ const CalendarView = ({ tasks }) => {
                     endAccessor="end"
                     style={{ height: '100%', color: 'white' }}
                     views={['month', 'week', 'day']}
-                    defaultView="week"
+                    view={view}
+                    onView={setView}
+                    date={date}
+                    onNavigate={setDate}
                     step={30}
                     timeslots={2}
                     tooltipAccessor="title"

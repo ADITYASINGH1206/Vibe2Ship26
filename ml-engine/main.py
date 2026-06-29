@@ -66,3 +66,18 @@ def analyze_tasks(request: AnalyzeRequest):
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+class RecommendRequest(BaseModel):
+    riskScore: float
+    category: str
+    totalTasks: int
+
+@app.post("/recommend")
+def get_recommendation(request: RecommendRequest):
+    try:
+        from recommendation_service import get_recommendations
+        insight = get_recommendations(request.riskScore, request.category, request.totalTasks)
+        return {"status": "success", "recommendation": insight}
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))

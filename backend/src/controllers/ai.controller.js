@@ -115,6 +115,26 @@ const generatePlan = async (req, res) => {
             }
         }
 
+        // Fetch Personalized Productivity Recommendation from ML Engine
+        let recommendation = "Stay focused and maintain steady progress.";
+        try {
+            const recResponse = await fetch(`${process.env.ML_ENGINE_URL}/recommend`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    riskScore: totalRisk,
+                    category: category || "Uncategorized",
+                    totalTasks: mlEnrichedTasks.length
+                })
+            });
+            if (recResponse.ok) {
+                const recData = await recResponse.json();
+                recommendation = recData.recommendation;
+            }
+        } catch (e) {
+            console.error("Failed to fetch recommendation from ML Engine:", e.message);
+        }
+
         // Enforce the strict JSON response format requested by the user
         res.status(200).json({
             microTasks: mlEnrichedTasks.map(t => ({
@@ -124,6 +144,7 @@ const generatePlan = async (req, res) => {
             })),
             riskScore: totalRisk,
             category: category || "Uncategorized",
+            recommendation: recommendation,
             
             // Keeping auxiliary data that powers existing UI features gracefully
             objective: parsedData.objective,

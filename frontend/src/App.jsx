@@ -1,26 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import InputBar from './components/InputBar';
-import RiskMeter from './components/RiskMeter';
-import SemanticClusters from './components/SemanticClusters';
-import CalendarView from './components/CalendarView';
 import { analyzeTask } from './services/api';
-import { BrainCircuit, BellRing } from 'lucide-react';
+import { BrainCircuit, Activity, Calendar, CheckSquare, Lightbulb } from 'lucide-react';
+
+import DashboardView from './components/DashboardView';
+import TaskManagerView from './components/TaskManagerView';
+import CalendarView from './components/CalendarView';
+import InsightsView from './components/InsightsView';
 
 const LOADING_PHASES = [
     "Extracting entities & timeline...",
     "Clustering tasks semantically...",
     "Calculating failure risk...",
+    "Generating personalized insights...",
     "Finalizing agentic schedule..."
 ];
 
 function App() {
+    const [activeTab, setActiveTab] = useState('dashboard');
     const [loadingPhase, setLoadingPhase] = useState(null);
     const [masterTaskList, setMasterTaskList] = useState([]);
     const [latestAnalytics, setLatestAnalytics] = useState(null);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Request Notification permission on mount
         if ("Notification" in window && Notification.permission === "default") {
             Notification.requestPermission();
         }
@@ -59,7 +61,8 @@ function App() {
                 interventionTriggered: result.interventionTriggered,
                 nextNudgeTime: result.nextNudgeTime,
                 category: result.category,
-                objective: result.objective
+                objective: result.objective,
+                recommendation: result.recommendation
             });
 
             const isHighRisk = result.interventionTriggered || result.riskScore > 0.7;
@@ -69,6 +72,10 @@ function App() {
                     `High risk of failure for [${result.objective}]. I have scheduled a priority review for you.`
                 );
             }
+            
+            // Switch to dashboard view automatically upon successful submission
+            setActiveTab('dashboard');
+
         } catch (err) {
             clearInterval(phaseInterval);
             setError("Failed to analyze the task. Please ensure the backend and ML-Engine are running.");
@@ -78,62 +85,75 @@ function App() {
         }
     };
 
+    const renderView = () => {
+        switch(activeTab) {
+            case 'dashboard':
+                return <DashboardView latestAnalytics={latestAnalytics} />;
+            case 'tasks':
+                return <TaskManagerView onAnalyze={handleAnalyze} loadingPhase={loadingPhase} masterTaskList={masterTaskList} />;
+            case 'calendar':
+                return (
+                    <div className="w-full flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="flex items-center gap-3 mb-2 border-b border-gray-700 pb-4">
+                            <Calendar className="w-8 h-8 text-indigo-400" />
+                            <h2 className="text-3xl font-bold text-gray-100">Calendar Planner</h2>
+                        </div>
+                        <CalendarView tasks={masterTaskList} />
+                    </div>
+                );
+            case 'insights':
+                return <InsightsView latestAnalytics={latestAnalytics} />;
+            default:
+                return <DashboardView latestAnalytics={latestAnalytics} />;
+        }
+    };
+
+    const NavItem = ({ id, icon: Icon, label }) => (
+        <button
+            onClick={() => setActiveTab(id)}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === id ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'}`}
+        >
+            <Icon className="w-5 h-5" />
+            <span className="font-medium">{label}</span>
+        </button>
+    );
+
     return (
-        <div className="min-h-screen p-6 md:p-12 font-sans selection:bg-blue-500 selection:text-white pb-24">
-            <header className="flex flex-col items-center justify-center mb-12 text-center">
-                <div className="flex items-center gap-3 mb-4">
-                    <BrainCircuit className="w-10 h-10 text-blue-500" />
-                    <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
-                        The Last-Minute Life Saver
+        <div className="min-h-screen flex bg-gray-900 font-sans selection:bg-blue-500 selection:text-white">
+            {/* Sidebar Navigation */}
+            <aside className="w-64 border-r border-gray-800 bg-gray-900/50 hidden md:flex flex-col flex-shrink-0">
+                <div className="p-6 flex items-center gap-3 border-b border-gray-800">
+                    <BrainCircuit className="w-8 h-8 text-blue-500" />
+                    <h1 className="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
+                        Vibe2Ship
                     </h1>
                 </div>
-                <p className="text-gray-400 text-lg max-w-2xl">
-                    Dump your raw thoughts. The Agentic Brain will parse, schedule, and assess the risk of failure for you.
-                </p>
-            </header>
-
-            <main className="max-w-7xl mx-auto flex flex-col gap-8">
-                <InputBar onAnalyze={handleAnalyze} loadingPhase={loadingPhase} />
                 
+                <nav className="flex-1 p-4 flex flex-col gap-2">
+                    <NavItem id="dashboard" icon={Activity} label="Dashboard" />
+                    <NavItem id="tasks" icon={CheckSquare} label="Task Manager" />
+                    <NavItem id="calendar" icon={Calendar} label="Calendar" />
+                    <NavItem id="insights" icon={Lightbulb} label="Insights" />
+                </nav>
+            </aside>
+
+            {/* Mobile Navigation Bar */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 border-t border-gray-800 bg-gray-900/95 backdrop-blur-md z-50 flex justify-around p-3">
+                <button onClick={() => setActiveTab('dashboard')} className={`p-2 rounded-lg ${activeTab === 'dashboard' ? 'text-blue-400 bg-blue-900/30' : 'text-gray-500'}`}><Activity className="w-6 h-6" /></button>
+                <button onClick={() => setActiveTab('tasks')} className={`p-2 rounded-lg ${activeTab === 'tasks' ? 'text-emerald-400 bg-emerald-900/30' : 'text-gray-500'}`}><CheckSquare className="w-6 h-6" /></button>
+                <button onClick={() => setActiveTab('calendar')} className={`p-2 rounded-lg ${activeTab === 'calendar' ? 'text-indigo-400 bg-indigo-900/30' : 'text-gray-500'}`}><Calendar className="w-6 h-6" /></button>
+                <button onClick={() => setActiveTab('insights')} className={`p-2 rounded-lg ${activeTab === 'insights' ? 'text-yellow-400 bg-yellow-900/30' : 'text-gray-500'}`}><Lightbulb className="w-6 h-6" /></button>
+            </div>
+
+            {/* Main Content Area */}
+            <main className="flex-1 p-6 md:p-12 pb-24 h-screen overflow-y-auto overflow-x-hidden">
                 {error && (
-                    <div className="text-red-400 bg-red-900/30 p-4 rounded-lg text-center border border-red-800 max-w-4xl mx-auto w-full">
+                    <div className="mb-6 text-red-400 bg-red-900/30 p-4 rounded-lg text-center border border-red-800 max-w-4xl mx-auto w-full">
                         {error}
                     </div>
                 )}
-
-                {/* Dashboard View */}
-                {masterTaskList.length > 0 && (
-                    <>
-                        <div className="flex flex-col lg:flex-row gap-8 items-start w-full">
-                            {/* Left Column: Risk Meter & Checklists (1/3 width) */}
-                            <div className="w-full lg:w-1/3 flex flex-col gap-6">
-                                <RiskMeter riskScore={latestAnalytics?.riskScore || 0} />
-                                
-                                {latestAnalytics?.interventionTriggered && latestAnalytics?.nextNudgeTime && (
-                                    <div className="glass-panel p-4 flex items-center bg-orange-900/20 border-orange-700/50">
-                                        <BellRing className="w-8 h-8 text-orange-400 mr-4 animate-bounce" />
-                                        <div>
-                                            <h4 className="text-orange-300 font-bold text-sm">Nudge Status Active</h4>
-                                            <p className="text-orange-200/80 text-xs mt-1">
-                                                Next Proactive Intervention scheduled for:<br/>
-                                                <span className="font-semibold text-white">
-                                                    {new Date(latestAnalytics.nextNudgeTime).toLocaleString()}
-                                                </span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <SemanticClusters tasks={masterTaskList} />
-                            </div>
-                            
-                            {/* Right Column: Calendar View (2/3 width) */}
-                            <div className="w-full lg:w-2/3">
-                                <CalendarView tasks={masterTaskList} />
-                            </div>
-                        </div>
-                    </>
-                )}
+                
+                {renderView()}
             </main>
         </div>
     );
