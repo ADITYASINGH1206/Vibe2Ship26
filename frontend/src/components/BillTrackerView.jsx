@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const BillTrackerView = ({ bills, setBills }) => {
+const BillTrackerView = ({ bills, setBills, setHistoryLedger }) => {
     const [payee, setPayee] = useState('');
     const [amount, setAmount] = useState('');
     const [dueDate, setDueDate] = useState('');
@@ -21,6 +21,24 @@ const BillTrackerView = ({ bills, setBills }) => {
     };
 
     const togglePaid = (id) => {
+        const bill = bills.find(b => b.id === id);
+        if (!bill) return;
+
+        if (!bill.paid) {
+            // It was unpaid, now paying -> add to ledger
+            setHistoryLedger?.(prev => [{
+                id: Math.random().toString(36).substr(2, 9),
+                refId: bill.id,
+                type: 'bill',
+                title: bill.payee,
+                amount: bill.amount,
+                completedAt: new Date().toISOString()
+            }, ...prev]);
+        } else {
+            // It was paid, now un-paying -> remove from ledger
+            setHistoryLedger?.(prev => prev.filter(item => item.refId !== bill.id));
+        }
+
         setBills(prev => prev.map(b => b.id === id ? { ...b, paid: !b.paid } : b));
     };
 

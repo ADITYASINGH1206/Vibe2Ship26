@@ -12,6 +12,7 @@ import BillTrackerView from './components/BillTrackerView';
 import HabitsView from './components/HabitsView';
 import DeveloperProfile from './components/DeveloperProfile';
 import BiometricCheckModal from './components/BiometricCheckModal';
+import HistoryLedgerView from './components/HistoryLedgerView';
 
 const LOADING_PHASES = [
     "Extracting entities & timeline...",
@@ -39,8 +40,20 @@ function App() {
 
     // Global State
     const [masterTaskList, setMasterTaskList] = useLocalStorage('vibe2ship_tasks', []);
+    const [historyLedger, setHistoryLedger] = useLocalStorage('vibe2ship_history', []);
     
     const handleCompleteTask = (taskId) => {
+        const taskToComplete = masterTaskList.find(t => t.id === taskId);
+        if (taskToComplete) {
+            setHistoryLedger(prev => [{
+                id: Math.random().toString(36).substr(2, 9),
+                refId: taskToComplete.id,
+                type: 'task',
+                title: taskToComplete.title,
+                objective: taskToComplete.objective,
+                completedAt: new Date().toISOString()
+            }, ...prev]);
+        }
         setMasterTaskList(prev => prev.filter(t => t.id !== taskId));
     };
 
@@ -176,9 +189,11 @@ function App() {
             case 'insights':
                 return <InsightsView latestAnalytics={latestAnalytics} masterTaskList={masterTaskList} />;
             case 'bills':
-                return <BillTrackerView bills={bills} setBills={setBills} />;
+                return <BillTrackerView bills={bills} setBills={setBills} setHistoryLedger={setHistoryLedger} />;
             case 'habits':
                 return <HabitsView habits={habits} setHabits={setHabits} />;
+            case 'history':
+                return <HistoryLedgerView historyLedger={historyLedger} />;
             case 'profile':
                 return <DeveloperProfile />;
             default:
@@ -231,6 +246,7 @@ function App() {
                     <NavItem id="calendar" icon="calendar_today" label="Smart Calendar" />
                     <NavItem id="bills" icon="account_balance_wallet" label="Fiscal & Bills" />
                     <NavItem id="habits" icon="bolt" label="Habits Synergy" />
+                    <NavItem id="history" icon="receipt_long" label="History Ledger" />
                     <NavItem id="insights" icon="psychology" label="AI Insights" />
                     <NavItem id="profile" icon="account_circle" label="Developer Profile" />
                 </nav>
@@ -242,6 +258,7 @@ function App() {
                 <button onClick={() => setActiveTab('dashboard')} className={`p-2 rounded-lg flex justify-center ${activeTab === 'dashboard' ? 'text-primary' : 'text-on-surface-variant'}`}><span className="material-symbols-outlined">dashboard</span></button>
                 <button onClick={() => setActiveTab('tasks')} className={`p-2 rounded-lg flex justify-center ${activeTab === 'tasks' ? 'text-primary' : 'text-on-surface-variant'}`}><span className="material-symbols-outlined">checklist</span></button>
                 <button onClick={() => setActiveTab('calendar')} className={`p-2 rounded-lg flex justify-center ${activeTab === 'calendar' ? 'text-primary' : 'text-on-surface-variant'}`}><span className="material-symbols-outlined">calendar_today</span></button>
+                <button onClick={() => setActiveTab('history')} className={`p-2 rounded-lg flex justify-center ${activeTab === 'history' ? 'text-primary' : 'text-on-surface-variant'}`}><span className="material-symbols-outlined">receipt_long</span></button>
                 <button onClick={() => setActiveTab('insights')} className={`p-2 rounded-lg flex justify-center ${activeTab === 'insights' ? 'text-primary' : 'text-on-surface-variant'}`}><span className="material-symbols-outlined">psychology</span></button>
                 <button onClick={() => setActiveTab('profile')} className={`p-2 rounded-lg flex justify-center ${activeTab === 'profile' ? 'text-primary' : 'text-on-surface-variant'}`}><span className="material-symbols-outlined">account_circle</span></button>
             </div>
