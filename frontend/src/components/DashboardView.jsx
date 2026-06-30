@@ -1,12 +1,37 @@
 import React, { useState } from 'react';
 import RiskMeter from './RiskMeter';
 
-const DashboardView = ({ latestAnalytics, masterTaskList, setMasterTaskList, requireBiometricCheck, bills, habits }) => {
+const DashboardView = ({ latestAnalytics, setLatestAnalytics, masterTaskList, setMasterTaskList, handleCompleteTask, requireBiometricCheck, bills, habits, setActiveTab }) => {
     const [openMenuId, setOpenMenuId] = useState(null);
+    const [editingObjective, setEditingObjective] = useState(null);
+    const [editName, setEditName] = useState("");
 
     // Calculate metrics
     const pendingTasks = masterTaskList.length;
-    const pendingBills = bills.filter(b => !b.paid).length;
+    const pendingBills = (bills || []).filter(b => !b.paid).length;
+    const calculateStreak = (habit) => {
+        if (!habit.completedDays) return 0;
+        const safeDays = habit.completedDays.filter(d => typeof d === 'string');
+        let streak = 0;
+        let d = new Date();
+        const todayStr = d.toISOString().split('T')[0];
+        
+        if (safeDays.includes(todayStr)) streak++;
+        
+        d.setDate(d.getDate() - 1);
+        while(true) {
+            const dateStr = d.toISOString().split('T')[0];
+            if (safeDays.includes(dateStr)) {
+                streak++;
+                d.setDate(d.getDate() - 1);
+            } else {
+                break;
+            }
+        }
+        return streak;
+    };
+    
+    const habitStreak = (habits || []).reduce((max, habit) => Math.max(max, calculateStreak(habit)), 0);
     
     // Group tasks by objective
     const groupedTasks = masterTaskList.reduce((acc, task) => {
@@ -37,12 +62,17 @@ const DashboardView = ({ latestAnalytics, masterTaskList, setMasterTaskList, req
         setOpenMenuId(null);
     };
 
-    const handleEdit = (objective) => {
-        const newName = prompt(`Edit objective name:`, objective);
-        if (newName && newName.trim()) {
-            setMasterTaskList(prev => prev.map(t => t.objective === objective ? { ...t, objective: newName.trim() } : t));
-        }
+    const handleEditStart = (objective) => {
+        setEditingObjective(objective);
+        setEditName(objective);
         setOpenMenuId(null);
+    };
+
+    const handleEditSave = () => {
+        if (editName && editName.trim()) {
+            setMasterTaskList(prev => prev.map(t => t.objective === editingObjective ? { ...t, objective: editName.trim() } : t));
+        }
+        setEditingObjective(null);
     };
 
     return (
@@ -107,13 +137,12 @@ const DashboardView = ({ latestAnalytics, masterTaskList, setMasterTaskList, req
                     </div>
                     <div>
                         <p className="font-label-caps text-label-caps text-on-surface-variant mb-1">Habit Streak</p>
-                        <h3 className="font-h3 text-h3 text-primary">0 <span className="text-on-surface-variant/40 text-metric">DAYS</span></h3>
+                        <h3 className="font-h3 text-h3 text-primary">{habitStreak} <span className="text-on-surface-variant/40 text-metric">DAYS</span></h3>
                     </div>
                     <div className="flex gap-1 mt-2">
-                        <div className="h-1 flex-1 bg-primary rounded-full"></div>
-                        <div className="h-1 flex-1 bg-primary rounded-full"></div>
-                        <div className="h-1 flex-1 bg-primary rounded-full"></div>
-                        <div className="h-1 flex-1 bg-primary/20 rounded-full"></div>
+                        {[...Array(7)].map((_, i) => (
+                            <div key={i} className={`h-1 flex-1 rounded-full ${i < habitStreak ? 'bg-primary shadow-[0_0_8px_rgba(var(--color-primary-rgb),0.5)]' : 'bg-primary/20'}`}></div>
+                        ))}
                     </div>
                 </div>
             </section>
@@ -145,7 +174,21 @@ const DashboardView = ({ latestAnalytics, masterTaskList, setMasterTaskList, req
                                                     <span className={`material-symbols-outlined ${style.text}`}>{style.icon}</span>
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-metric text-metric text-on-surface group-hover:text-primary transition-colors">{objective}</h4>
+                                                    {editingObjective === objective ? (
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <input 
+                                                                value={editName} 
+                                                                onChange={(e) => setEditName(e.target.value)} 
+                                                                className="bg-surface-container-highest border border-border-subtle rounded px-2 py-1 text-on-surface font-metric text-sm outline-none focus:border-primary"
+                                                                autoFocus
+                                                                onKeyDown={(e) => e.key === 'Enter' && handleEditSave()}
+                                                            />
+                                                            <button onClick={handleEditSave} className="text-accent-emerald hover:text-accent-emerald/80 p-1"><span className="material-symbols-outlined text-[18px]">check</span></button>
+                                                            <button onClick={() => setEditingObjective(null)} className="text-error hover:text-error/80 p-1"><span className="material-symbols-outlined text-[18px]">close</span></button>
+                                                        </div>
+                                                    ) : (
+                                                        <h4 className="font-metric text-metric text-on-surface group-hover:text-primary transition-colors">{objective}</h4>
+                                                    )}
                                                     <p className="font-label-caps text-[10px] text-on-surface-variant mt-1 tracking-widest uppercase">{data.category || 'General'}</p>
                                                 </div>
                                             </div>
@@ -159,8 +202,8 @@ const DashboardView = ({ latestAnalytics, masterTaskList, setMasterTaskList, req
                                                 </button>
                                                 {openMenuId === objective && (
                                                     <div className="absolute right-0 top-10 mt-2 w-32 bg-surface border border-border-subtle rounded-xl shadow-lg z-50 overflow-hidden py-1">
-                                                        <button onClick={() => handleEdit(objective)} className="w-full text-left px-4 py-2 hover:bg-surface-container-highest text-sm transition-colors text-on-surface">Edit</button>
-                                                        <button onClick={() => handleDelete(objective)} className="w-full text-left px-4 py-2 hover:bg-error/10 text-error text-sm transition-colors">Delete</button>
+                                                        <button onClick={() => handleEditStart(objective)} className="w-full text-left px-4 py-2 hover:bg-surface-container-highest text-sm transition-colors text-on-surface">Edit Name</button>
+                                                        <button onClick={() => handleDelete(objective)} className="w-full text-left px-4 py-2 hover:bg-error/10 text-error text-sm transition-colors">Delete Cluster</button>
                                                     </div>
                                                 )}
                                             </div>
@@ -168,9 +211,15 @@ const DashboardView = ({ latestAnalytics, masterTaskList, setMasterTaskList, req
                                         {/* Subtasks inline */}
                                         <div className="pl-[64px] flex flex-col gap-2">
                                             {data.tasks.map(task => (
-                                                <div key={task.id} className="text-sm font-body-md text-on-surface-variant flex justify-between items-center bg-surface-container/50 px-3 py-2 rounded-lg border border-border-subtle/50 hover:border-border-subtle transition-colors">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="w-1 h-1 rounded-full bg-primary/40"></span>
+                                                <div key={task.id} className="text-sm font-body-md text-on-surface-variant flex justify-between items-center bg-surface-container/50 px-3 py-2 rounded-lg border border-border-subtle/50 hover:border-border-subtle transition-colors group/task">
+                                                    <div className="flex items-center gap-3">
+                                                        <button 
+                                                            onClick={() => handleCompleteTask && handleCompleteTask(task.id)}
+                                                            title="Complete Node"
+                                                            className="w-4 h-4 rounded-full border border-on-surface-variant/50 hover:border-accent-emerald hover:bg-accent-emerald/20 flex items-center justify-center transition-colors group-hover/task:border-accent-emerald"
+                                                        >
+                                                            <span className="material-symbols-outlined text-[10px] text-transparent hover:text-accent-emerald">check</span>
+                                                        </button>
                                                         <span>{task.title}</span>
                                                     </div>
                                                     <span className="font-label-caps text-[10px] bg-surface-container-highest px-2 py-1 rounded text-on-surface-variant">{task.duration}m</span>
@@ -199,8 +248,18 @@ const DashboardView = ({ latestAnalytics, masterTaskList, setMasterTaskList, req
                                     <h4 className="font-metric text-metric text-primary leading-tight">Attention: {latestAnalytics.objective}</h4>
                                     <p className="text-on-surface-variant font-body-md text-sm leading-relaxed">{latestAnalytics.recommendation}</p>
                                     <div className="flex flex-col gap-3 mt-6">
-                                        <button className="w-full bg-primary text-background hover:bg-primary/90 transition-colors rounded-xl py-3 px-4 font-metric text-sm tracking-wide">Review Optimization</button>
-                                        <button className="w-full bg-transparent border border-border-subtle hover:border-on-surface-variant text-on-surface-variant transition-colors rounded-xl py-3 px-4 font-metric text-sm tracking-wide">Dismiss</button>
+                                        <button 
+                                            onClick={() => setActiveTab('insights')} 
+                                            className="w-full bg-primary text-background hover:bg-primary/90 transition-colors rounded-xl py-3 px-4 font-metric text-sm tracking-wide"
+                                        >
+                                            Review Optimization
+                                        </button>
+                                        <button 
+                                            onClick={() => setLatestAnalytics && setLatestAnalytics(null)} 
+                                            className="w-full bg-transparent border border-border-subtle hover:border-on-surface-variant text-on-surface-variant transition-colors rounded-xl py-3 px-4 font-metric text-sm tracking-wide"
+                                        >
+                                            Dismiss
+                                        </button>
                                     </div>
                                 </>
                             ) : (

@@ -25,6 +25,7 @@ function App() {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [loadingPhase, setLoadingPhase] = useState(null);
     const [error, setError] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
     const [isDarkMode, setIsDarkMode] = useState(true);
 
     // Toggle Dark Mode
@@ -38,6 +39,11 @@ function App() {
 
     // Global State
     const [masterTaskList, setMasterTaskList] = useLocalStorage('vibe2ship_tasks', []);
+    
+    const handleCompleteTask = (taskId) => {
+        setMasterTaskList(prev => prev.filter(t => t.id !== taskId));
+    };
+
     const [latestAnalytics, setLatestAnalytics] = useState(null);
     const [bills, setBills] = useLocalStorage('vibe2ship_bills', [
         { id: 1, payee: 'Electricity Provider', amount: 120.50, dueDate: new Date(Date.now() + 86400000 * 2).toISOString(), paid: false },
@@ -146,6 +152,7 @@ function App() {
             setActiveTab('dashboard');
 
         } catch (err) {
+            console.error(err);
             clearInterval(phaseInterval);
             setError("Failed to analyze the task. Please ensure the backend and ML-Engine are running.");
         } finally {
@@ -154,12 +161,16 @@ function App() {
         }
     };
 
+    const handleManualCreate = (taskData) => {
+        setMasterTaskList(prev => [...prev, ...taskData]);
+    };
+
     const renderView = () => {
         switch(activeTab) {
             case 'dashboard':
-                return <DashboardView latestAnalytics={latestAnalytics} masterTaskList={masterTaskList} setMasterTaskList={setMasterTaskList} requireBiometricCheck={requireBiometricCheck} bills={bills} habits={habits} />;
+                return <DashboardView latestAnalytics={latestAnalytics} setLatestAnalytics={setLatestAnalytics} masterTaskList={masterTaskList} setMasterTaskList={setMasterTaskList} handleCompleteTask={handleCompleteTask} requireBiometricCheck={requireBiometricCheck} bills={bills} habits={habits} setActiveTab={setActiveTab} />;
             case 'tasks':
-                return <TaskManagerView onAnalyze={handleAnalyze} loadingPhase={loadingPhase} masterTaskList={masterTaskList} />;
+                return <TaskManagerView onAnalyze={handleAnalyze} loadingPhase={loadingPhase} masterTaskList={masterTaskList} handleCompleteTask={handleCompleteTask} searchQuery={searchQuery} onManualCreate={handleManualCreate} />;
             case 'calendar':
                 return <CalendarView tasks={masterTaskList} setTasks={setMasterTaskList} bills={bills} />;
             case 'insights':
@@ -247,7 +258,16 @@ function App() {
                         </div>
                         <div className="relative hidden md:block">
                             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60">search</span>
-                            <input className="bg-surface-container-low border border-border-subtle/50 dark:border-white/10 rounded-full pl-10 pr-6 py-2 font-body-md text-primary focus:ring-1 focus:ring-primary w-64 transition-all focus:w-80" placeholder="Scan nodes..." type="text"/>
+                            <input 
+                                className="bg-surface-container-low border border-border-subtle/50 dark:border-white/10 rounded-full pl-10 pr-6 py-2 font-body-md text-primary focus:ring-1 focus:ring-primary w-64 transition-all focus:w-80" 
+                                placeholder="Search tasks..." 
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => {
+                                    setSearchQuery(e.target.value);
+                                    if (e.target.value.trim() !== '' && activeTab !== 'tasks') setActiveTab('tasks');
+                                }}
+                            />
                         </div>
                     </div>
                     <div className="flex items-center gap-4">

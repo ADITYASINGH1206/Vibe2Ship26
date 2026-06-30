@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 import { Clock, CheckCircle2, Circle } from 'lucide-react';
 
-const TaskCard = ({ task }) => {
+const TaskCard = ({ task, onComplete }) => {
     const [completed, setCompleted] = useState(false);
+
+    const handleComplete = () => {
+        setCompleted(true);
+        setTimeout(() => {
+            if (onComplete) onComplete(task.id);
+        }, 300);
+    };
 
     return (
         <div className={`transition-all rounded-xl p-4 border transform hover:-translate-y-1 cursor-default flex flex-col
@@ -10,7 +17,7 @@ const TaskCard = ({ task }) => {
         >
             <div className="flex items-start justify-between gap-3">
                 <button 
-                    onClick={() => setCompleted(!completed)}
+                    onClick={handleComplete}
                     className="mt-1 flex-shrink-0 text-on-surface-variant hover:text-accent-emerald transition-colors focus:outline-none"
                 >
                     {completed ? <CheckCircle2 className="w-5 h-5 text-accent-emerald" /> : <Circle className="w-5 h-5" />}

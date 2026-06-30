@@ -1,7 +1,7 @@
 import React from 'react';
 import TaskCard from './TaskCard';
 
-const SemanticClusters = ({ tasks }) => {
+const SemanticClusters = ({ tasks, handleCompleteTask }) => {
     if (!tasks || tasks.length === 0) {
         return (
             <div className="glass-card p-8 w-full flex items-center justify-center h-64 text-on-surface-variant italic rounded-2xl">
@@ -33,7 +33,7 @@ const SemanticClusters = ({ tasks }) => {
                     
                     <div className="flex-1 overflow-y-auto pr-2 flex flex-col gap-3 custom-scrollbar">
                         {groupedTasks[clusterName].map((task, taskIdx) => (
-                            <TaskCard key={taskIdx} task={task} />
+                            <TaskCard key={taskIdx} task={task} onComplete={handleCompleteTask} />
                         ))}
                     </div>
                 </div>

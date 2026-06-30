@@ -42,6 +42,10 @@ class TaskClusterer:
         
         # Fit if not already fitted (in a real app, this would be pretrained or fit periodically)
         if not self.is_fitted:
+            if len(tasks) < self.kmeans.n_clusters:
+                for idx, task in enumerate(tasks):
+                    task.contextCluster = self.cluster_names.get(idx % 3, "Unknown")
+                return tasks
             self.kmeans.partial_fit(X)
             self.is_fitted = True
             

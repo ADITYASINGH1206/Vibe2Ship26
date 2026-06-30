@@ -5,6 +5,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 const InputBar = ({ onAnalyze, loadingPhase }) => {
     const [text, setText] = useState('');
+    const [notes, setNotes] = useState('');
     const [category, setCategory] = useState('Work');
     const [targetDeadline, setTargetDeadline] = useState(null);
 
@@ -13,8 +14,9 @@ const InputBar = ({ onAnalyze, loadingPhase }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (text.trim() && !isLoading) {
+            const finalDescription = notes.trim() ? `${text}\n\nAdditional Subtasks & Links:\n${notes}` : text;
             onAnalyze({
-                taskDescription: text,
+                taskDescription: finalDescription,
                 category,
                 targetDeadline: targetDeadline ? targetDeadline.toISOString() : null
             });
@@ -24,18 +26,25 @@ const InputBar = ({ onAnalyze, loadingPhase }) => {
     return (
         <form onSubmit={handleSubmit} className="w-full max-w-4xl mx-auto mb-8 glass-card p-6 rounded-2xl flex flex-col gap-4">
             <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 relative">
+                <div className="flex-1 flex flex-col gap-3 relative">
                     <input
                         type="text"
                         className="w-full bg-surface-container-low text-on-surface border border-border-subtle rounded-xl py-3 pl-4 pr-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body-md"
-                        placeholder="Dump your task thoughts here (e.g., 'Chemistry paper due Friday')..."
+                        placeholder="Main objective (e.g., 'Prep for Presentation')..."
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                         disabled={isLoading}
                     />
+                    <textarea
+                        className="w-full bg-surface-container-lowest text-on-surface border border-border-subtle rounded-xl py-3 pl-4 pr-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body-sm resize-none h-20"
+                        placeholder="Add explicit subtasks, links, or specific notes here (optional)..."
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        disabled={isLoading}
+                    ></textarea>
                 </div>
                 
-                <div className="flex gap-4">
+                <div className="flex flex-col gap-4">
                     <div className="relative flex items-center bg-surface-container-low border border-border-subtle rounded-xl px-4 focus-within:border-primary transition-all z-50">
                         <Tag className="w-4 h-4 text-on-surface-variant mr-2" />
                         <select 

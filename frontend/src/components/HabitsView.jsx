@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
 
-const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const getLast7Days = () => {
+    return Array.from({length: 7}).map((_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (6 - i));
+        return d;
+    });
+};
 
 const HabitsView = ({ habits, setHabits }) => {
     const [newHabit, setNewHabit] = useState('');
+    const last7Days = getLast7Days();
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     const handleAddHabit = (e) => {
         e.preventDefault();
@@ -17,13 +25,15 @@ const HabitsView = ({ habits, setHabits }) => {
         setHabits(prev => prev.filter(h => h.id !== id));
     };
 
-    const toggleHabit = (habitId, dayIndex) => {
+    const toggleHabit = (habitId, dateStr) => {
         setHabits(prev => prev.map(h => {
             if (h.id === habitId) {
-                const isCompleted = h.completedDays.includes(dayIndex);
+                // Wipe out legacy index-based days if they exist to prevent crashes
+                const safeDays = (h.completedDays || []).filter(d => typeof d === 'string');
+                const isCompleted = safeDays.includes(dateStr);
                 const newDays = isCompleted 
-                    ? h.completedDays.filter(d => d !== dayIndex)
-                    : [...h.completedDays, dayIndex];
+                    ? safeDays.filter(d => d !== dateStr)
+                    : [...safeDays, dateStr];
                 return { ...h, completedDays: newDays };
             }
             return h;
@@ -31,7 +41,13 @@ const HabitsView = ({ habits, setHabits }) => {
     };
 
     const totalPossible = habits.length * 7;
-    const totalCompleted = habits.reduce((acc, h) => acc + h.completedDays.length, 0);
+    // Calculate completed just for the visible 7 days for the progress bar
+    const totalCompleted = habits.reduce((acc, h) => {
+        const safeDays = (h.completedDays || []).filter(d => typeof d === 'string');
+        const completedInWindow = last7Days.filter(dateObj => safeDays.includes(dateObj.toISOString().split('T')[0])).length;
+        return acc + completedInWindow;
+    }, 0);
+    
     const progressPercent = totalPossible === 0 ? 0 : Math.round((totalCompleted / totalPossible) * 100);
 
     return (
@@ -57,7 +73,7 @@ const HabitsView = ({ habits, setHabits }) => {
             <div className="glass-card p-6 rounded-2xl">
                 <div className="flex justify-between items-end mb-4">
                     <h3 className="font-metric text-metric text-on-surface flex items-center gap-2">
-                        Weekly Saturation <span className={`material-symbols-outlined ${progressPercent > 50 ? 'text-primary' : 'text-on-surface-variant'}`}>local_fire_department</span>
+                        7-Day Saturation <span className={`material-symbols-outlined ${progressPercent > 50 ? 'text-primary' : 'text-on-surface-variant'}`}>local_fire_department</span>
                     </h3>
                     <span className="font-h3 text-h3 text-primary">{progressPercent}%</span>
                 </div>
@@ -74,23 +90,28 @@ const HabitsView = ({ habits, setHabits }) => {
                     <thead>
                         <tr className="bg-surface-container/50 border-b border-border-subtle/50">
                             <th className="p-4 font-label-caps text-label-caps uppercase text-on-surface-variant w-1/3 tracking-widest">Protocol</th>
-                            {DAYS.map(day => (
-                                <th key={day} className="p-4 text-center font-label-caps text-label-caps uppercase text-on-surface-variant tracking-widest">{day}</th>
+                            {last7Days.map(dateObj => (
+                                <th key={dateObj.toISOString()} className="p-4 text-center font-label-caps text-[10px] uppercase text-on-surface-variant tracking-widest leading-tight">
+                                    {dayNames[dateObj.getDay()]}<br/><span className="opacity-60">{dateObj.getDate()}</span>
+                                </th>
                             ))}
+                            <th className="p-4 w-12"></th>
                         </tr>
                     </thead>
                     <tbody>
                         {habits.map(habit => (
                             <tr key={habit.id} className="border-b border-border-subtle/50 last:border-0 hover:bg-surface-bright/20 transition-colors">
                                 <td className="p-4 font-body-md font-medium text-on-surface">{habit.name}</td>
-                                {DAYS.map((day, idx) => {
-                                    const isDone = habit.completedDays.includes(idx);
+                                {last7Days.map((dateObj, idx) => {
+                                    const dateStr = dateObj.toISOString().split('T')[0];
+                                    const safeDays = (habit.completedDays || []).filter(d => typeof d === 'string');
+                                    const isDone = safeDays.includes(dateStr);
                                     return (
                                         <td key={idx} className="p-4 text-center">
                                             <button 
-                                                onClick={() => toggleHabit(habit.id, idx)}
+                                                onClick={() => toggleHabit(habit.id, dateStr)}
                                                 className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center transition-all transform hover:scale-110 mx-auto
-                                                    ${isDone ? 'bg-primary border-primary text-background' : 'bg-transparent border-border-subtle hover:border-primary/50'}`}
+                                                    ${isDone ? 'bg-primary border-primary text-background shadow-[0_0_10px_rgba(var(--color-primary-rgb),0.4)]' : 'bg-transparent border-border-subtle hover:border-primary/50'}`}
                                             >
                                                 {isDone && <span className="material-symbols-outlined text-[18px]">check</span>}
                                             </button>

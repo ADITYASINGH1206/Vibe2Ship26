@@ -23,7 +23,7 @@ const generatePlan = async (req, res) => {
             Target Deadline: ${targetDeadline ? new Date(targetDeadline).toISOString() : 'None provided (extrapolate a reasonable deadline)'}
 
             Instructions:
-            1. Break the objective down into actionable micro-tasks.
+            1. Break the objective down into actionable micro-tasks. Generate a dynamic number of tasks (from 1 up to 8) based purely on the complexity of the objective.
             2. Schedule each micro-task by assigning a realistic 'startTime' (ISO format) and 'durationMinutes'. Ensure they fit before the deadline and don't overlap. Use the current time as a baseline: ${new Date().toISOString()}.
 
             Respond ONLY with a valid JSON object in this EXACT format:
@@ -46,14 +46,17 @@ const generatePlan = async (req, res) => {
             console.error("Gemini API Error (Fallback Triggered):", apiError.message);
             // Fallback mock data for demo purposes when API key is restricted/invalid
             const nowMs = Date.now();
+            const numTasks = Math.floor(Math.random() * 4) + 2; // Random 2 to 5 tasks
+            const mockTasks = Array.from({ length: numTasks }).map((_, i) => ({
+                title: `Auto-generated sub-task ${i + 1} for ${taskDescription.substring(0, 15)}...`,
+                startTime: new Date(nowMs + (i * 3600000)).toISOString(),
+                durationMinutes: 30 + (Math.floor(Math.random() * 30))
+            }));
+
             parsedData = {
                 objective: `[${category || 'Task'}] ` + taskDescription.substring(0, 30) + '...',
                 deadline: targetDeadline ? new Date(targetDeadline).toISOString() : new Date(nowMs + 86400000).toISOString(),
-                microTasks: [
-                    { title: "Review requirements and category constraints", startTime: new Date(nowMs + 3600000).toISOString(), durationMinutes: 30 },
-                    { title: "Draft initial execution structure", startTime: new Date(nowMs + 7200000).toISOString(), durationMinutes: 60 },
-                    { title: "Finalize deliverables", startTime: new Date(nowMs + 14400000).toISOString(), durationMinutes: 30 }
-                ]
+                microTasks: mockTasks
             };
         }
 
