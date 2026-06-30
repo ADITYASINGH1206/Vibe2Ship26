@@ -62,17 +62,12 @@ const InputBar = ({ onAnalyze, loadingPhase }) => {
 
                     <div className="relative flex items-center bg-surface-container-low border border-border-subtle rounded-xl px-4 focus-within:border-primary transition-all z-50">
                         <Calendar className="w-4 h-4 text-on-surface-variant mr-2" />
-                        <DatePicker
-                            selected={targetDeadline}
-                            onChange={(date) => setTargetDeadline(date)}
-                            showTimeSelect
-                            timeFormat="HH:mm"
-                            timeIntervals={15}
-                            timeCaption="time"
-                            dateFormat="MMMM d, yyyy h:mm aa"
-                            placeholderText="Target Deadline..."
+                        <input
+                            type="datetime-local"
+                            value={targetDeadline ? new Date(targetDeadline.getTime() - targetDeadline.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ''}
+                            onChange={(e) => setTargetDeadline(e.target.value ? new Date(e.target.value) : null)}
                             disabled={isLoading}
-                            className="bg-transparent text-on-surface font-body-md py-3 focus:outline-none cursor-pointer w-48"
+                            className="bg-transparent text-on-surface font-body-md py-3 focus:outline-none w-48 cursor-pointer"
                         />
                     </div>
                 </div>
