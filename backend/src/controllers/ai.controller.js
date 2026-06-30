@@ -13,7 +13,7 @@ const generatePlan = async (req, res) => {
 
         let parsedData;
         try {
-            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
             const prompt = `
             You are a proactive productivity agent coordinating a calendar.
             Analyze the following task description:
