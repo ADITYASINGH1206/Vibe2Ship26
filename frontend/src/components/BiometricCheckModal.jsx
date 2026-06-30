@@ -13,7 +13,7 @@ const BiometricCheckModal = ({ isOpen, onClose, onSuccess }) => {
         // Simulate a 3-second scan
         setTimeout(() => {
             setIsScanning(false);
-            toast.success("Success: Identity Logged. Flattening risk curve.", {
+            toast.success("Identity Logged: Discipline Maintained", {
                 theme: 'dark'
             });
             onSuccess();

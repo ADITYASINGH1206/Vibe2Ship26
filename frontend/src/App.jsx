@@ -10,7 +10,7 @@ import CalendarView from './components/CalendarView';
 import InsightsView from './components/InsightsView';
 import BillTrackerView from './components/BillTrackerView';
 import HabitsView from './components/HabitsView';
-import DeveloperProfileView from './components/DeveloperProfileView';
+import DeveloperProfile from './components/DeveloperProfile';
 import BiometricCheckModal from './components/BiometricCheckModal';
 
 const LOADING_PHASES = [
@@ -51,6 +51,12 @@ function App() {
 
     const [isBiometricModalOpen, setIsBiometricModalOpen] = useState(false);
     const [enforcerTriggeredIds, setEnforcerTriggeredIds] = useState(new Set());
+    const [pendingBiometricAction, setPendingBiometricAction] = useState(null);
+
+    const requireBiometricCheck = (actionObj) => {
+        setPendingBiometricAction(actionObj);
+        setIsBiometricModalOpen(true);
+    };
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -77,6 +83,13 @@ function App() {
                 ...prev,
                 riskScore: Math.max(0.1, prev.riskScore - 0.4) // Dynamically flatten risk curve
             }));
+        }
+        
+        if (pendingBiometricAction) {
+            if (pendingBiometricAction.type === 'DELETE_OBJECTIVE') {
+                setMasterTaskList(prev => prev.filter(t => t.objective !== pendingBiometricAction.payload));
+            }
+            setPendingBiometricAction(null);
         }
     };
 
@@ -144,21 +157,21 @@ function App() {
     const renderView = () => {
         switch(activeTab) {
             case 'dashboard':
-                return <DashboardView latestAnalytics={latestAnalytics} masterTaskList={masterTaskList} setMasterTaskList={setMasterTaskList} bills={bills} habits={habits} />;
+                return <DashboardView latestAnalytics={latestAnalytics} masterTaskList={masterTaskList} setMasterTaskList={setMasterTaskList} requireBiometricCheck={requireBiometricCheck} bills={bills} habits={habits} />;
             case 'tasks':
                 return <TaskManagerView onAnalyze={handleAnalyze} loadingPhase={loadingPhase} masterTaskList={masterTaskList} />;
             case 'calendar':
                 return <CalendarView tasks={masterTaskList} setTasks={setMasterTaskList} bills={bills} />;
             case 'insights':
-                return <InsightsView latestAnalytics={latestAnalytics} />;
+                return <InsightsView latestAnalytics={latestAnalytics} masterTaskList={masterTaskList} />;
             case 'bills':
                 return <BillTrackerView bills={bills} setBills={setBills} />;
             case 'habits':
                 return <HabitsView habits={habits} setHabits={setHabits} />;
             case 'profile':
-                return <DeveloperProfileView />;
+                return <DeveloperProfile />;
             default:
-                return <DashboardView latestAnalytics={latestAnalytics} masterTaskList={masterTaskList} setMasterTaskList={setMasterTaskList} bills={bills} habits={habits} />;
+                return <DashboardView latestAnalytics={latestAnalytics} masterTaskList={masterTaskList} setMasterTaskList={setMasterTaskList} requireBiometricCheck={requireBiometricCheck} bills={bills} habits={habits} />;
         }
     };
 
@@ -252,6 +265,15 @@ function App() {
                             <span className="material-symbols-outlined">
                                 {isDarkMode ? 'light_mode' : 'dark_mode'}
                             </span>
+                        </button>
+
+                        {/* Force Biometric Demo Button */}
+                        <button 
+                            onClick={() => setIsBiometricModalOpen(true)}
+                            className="w-10 h-10 flex items-center justify-center rounded-full glass-card text-accent-purple hover:text-primary transition-colors scale-95 active:scale-90"
+                            title="Force Biometric Scan (Demo)"
+                        >
+                            <span className="material-symbols-outlined">fingerprint</span>
                         </button>
                         
                         <button className="w-10 h-10 flex items-center justify-center rounded-full glass-card text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90">

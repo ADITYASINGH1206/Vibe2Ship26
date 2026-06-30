@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import RiskMeter from './RiskMeter';
 
-const DashboardView = ({ latestAnalytics, masterTaskList, setMasterTaskList, bills, habits }) => {
+const DashboardView = ({ latestAnalytics, masterTaskList, setMasterTaskList, requireBiometricCheck, bills, habits }) => {
     const [openMenuId, setOpenMenuId] = useState(null);
 
     // Calculate metrics
@@ -33,7 +33,7 @@ const DashboardView = ({ latestAnalytics, masterTaskList, setMasterTaskList, bil
     };
 
     const handleDelete = (objective) => {
-        setMasterTaskList(prev => prev.filter(t => t.objective !== objective));
+        requireBiometricCheck({ type: 'DELETE_OBJECTIVE', payload: objective });
         setOpenMenuId(null);
     };
 

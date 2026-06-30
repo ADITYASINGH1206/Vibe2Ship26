@@ -28,8 +28,9 @@ const CalendarView = ({ tasks, setTasks, bills }) => {
     const [view, setView] = useState('week');
     const [date, setDate] = useState(new Date());
 
-    // Map tasks to react-big-calendar events
-    const taskEvents = tasks.map(task => {
+    // Map active tasks to react-big-calendar events
+    const activeTasks = tasks.filter(task => task.status !== 'Completed');
+    const taskEvents = activeTasks.map(task => {
         const start = new Date(task.startTime);
         const end = new Date(start.getTime() + (parseInt(task.duration) * 60000));
         return {
@@ -42,8 +43,9 @@ const CalendarView = ({ tasks, setTasks, bills }) => {
         };
     });
 
-    // Map bills to events
-    const billEvents = (bills || []).map(bill => {
+    // Map pending bills to events
+    const pendingBills = (bills || []).filter(bill => !bill.paid);
+    const billEvents = pendingBills.map(bill => {
         const start = new Date(bill.dueDate);
         const end = new Date(start.getTime() + 60 * 60 * 1000); // 1 hour block
         return {

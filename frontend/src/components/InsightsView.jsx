@@ -36,6 +36,7 @@ const RiskCurveChart = ({ data, pois }) => {
                         strokeWidth={3} 
                         dot={false} 
                         activeDot={{ r: 6, fill: '#3b82f6', stroke: '#1c1b1b', strokeWidth: 2 }} 
+                        style={{ filter: "drop-shadow(0px 0px 8px rgba(59, 130, 246, 0.8))" }}
                     />
                     
                     {pois.map((poi, index) => (
@@ -55,26 +56,37 @@ const RiskCurveChart = ({ data, pois }) => {
     );
 };
 
-const InsightsView = ({ latestAnalytics }) => {
-    // Generate simulated data based on latest risk score
+const InsightsView = ({ latestAnalytics, masterTaskList = [] }) => {
+    // Generate dynamic chart data based on masterTaskList scheduled days
+    const dayMap = { 0: 'Sun', 1: 'Mon', 2: 'Tue', 3: 'Wed', 4: 'Thu', 5: 'Fri', 6: 'Sat' };
     const baseRisk = latestAnalytics ? Math.round(latestAnalytics.riskScore * 100) : 30;
     
-    // Simulated weekly timeline data
-    const chartData = [
-        { time: 'Mon', risk: Math.max(0, baseRisk - 20) },
-        { time: 'Tue', risk: Math.max(0, baseRisk - 10) },
-        { time: 'Wed', risk: baseRisk },
-        { time: 'Thu', risk: Math.min(100, baseRisk + 15) },
-        { time: 'Fri', risk: Math.min(100, baseRisk + 25) },
-        { time: 'Sat', risk: Math.max(0, baseRisk - 30) },
-        { time: 'Sun', risk: Math.max(0, baseRisk - 40) },
-    ];
+    // Calculate total duration per day of week
+    const dailyDurations = { 'Sun': 0, 'Mon': 0, 'Tue': 0, 'Wed': 0, 'Thu': 0, 'Fri': 0, 'Sat': 0 };
+    masterTaskList.forEach(task => {
+        if(task.startTime) {
+            const date = new Date(task.startTime);
+            const dayName = dayMap[date.getDay()];
+            dailyDurations[dayName] += parseInt(task.duration || 0);
+        }
+    });
+
+    // Create a dynamic risk curve based on task load
+    const chartData = Object.keys(dailyDurations).map(day => {
+        const load = dailyDurations[day];
+        // For every 60 mins of tasks, add 15 to the base risk
+        let dynamicRisk = baseRisk + (load / 60) * 15;
+        return {
+            time: day,
+            risk: Math.min(100, Math.max(0, Math.round(dynamicRisk)))
+        };
+    });
 
     // Identify POIs (Points of Interest) where risk > 70
     const pois = chartData.filter(d => d.risk > 70);
 
     return (
-        <div className="w-full max-w-4xl mx-auto flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="w-full max-w-4xl mx-auto flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500 bg-slate-950 p-6 rounded-3xl">
             <div className="flex items-center gap-4 mb-2 border-b border-border-subtle/50 pb-6">
                 <span className="material-symbols-outlined text-[32px] text-accent-blue">psychology</span>
                 <h2 className="font-h3 text-h3 text-primary">Cognitive Insights</h2>

@@ -1,9 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const HabitsView = ({ habits, setHabits }) => {
-    
+    const [newHabit, setNewHabit] = useState('');
+
+    const handleAddHabit = (e) => {
+        e.preventDefault();
+        if (newHabit.trim()) {
+            setHabits(prev => [...prev, { id: Date.now(), name: newHabit.trim(), completedDays: [] }]);
+            setNewHabit('');
+        }
+    };
+
+    const deleteHabit = (id) => {
+        setHabits(prev => prev.filter(h => h.id !== id));
+    };
+
     const toggleHabit = (habitId, dayIndex) => {
         setHabits(prev => prev.map(h => {
             if (h.id === habitId) {
@@ -27,6 +40,19 @@ const HabitsView = ({ habits, setHabits }) => {
                 <span className="material-symbols-outlined text-[32px] text-primary">checklist</span>
                 <h2 className="font-h3 text-h3 text-primary">Habit Protocols</h2>
             </div>
+
+            <form onSubmit={handleAddHabit} className="flex gap-4 mb-2">
+                <input 
+                    type="text" 
+                    value={newHabit} 
+                    onChange={(e) => setNewHabit(e.target.value)} 
+                    placeholder="New habit protocol..." 
+                    className="flex-1 bg-surface-container-low text-on-surface border border-border-subtle rounded-xl py-3 px-4 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body-md"
+                />
+                <button type="submit" className="bg-primary text-background hover:bg-primary/90 px-6 py-3 rounded-xl font-metric transition-colors flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[20px]">add</span> Add Habit
+                </button>
+            </form>
 
             <div className="glass-card p-6 rounded-2xl">
                 <div className="flex justify-between items-end mb-4">
@@ -71,6 +97,15 @@ const HabitsView = ({ habits, setHabits }) => {
                                         </td>
                                     );
                                 })}
+                                <td className="p-4 text-center">
+                                    <button 
+                                        onClick={() => deleteHabit(habit.id)}
+                                        className="text-on-surface-variant hover:text-error transition-colors p-2 rounded-full hover:bg-error/10"
+                                        title="Delete Habit"
+                                    >
+                                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                                    </button>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
