@@ -205,10 +205,13 @@ function App() {
             <div className="orb bg-accent-purple w-[30rem] h-[30rem] bottom-0 right-0" style={{ animationDelay: '2s' }}></div>
             
             {/* Side Navigation Shell */}
-            <aside className="hidden lg:flex h-screen w-64 fixed left-0 top-0 border-r border-border-subtle/40 dark:border-white/10 flex-col py-6 px-4 bg-surface-panel/80 dark:bg-surface/80 backdrop-blur-xl z-50">
-                <div className="mb-8 px-2">
-                    <h1 className="font-h2 text-h2 tracking-tighter text-primary">Auralis</h1>
-                    <p className="font-label-caps text-label-caps text-on-surface-variant/60 uppercase tracking-widest mt-1">Audio Intelligence</p>
+            <aside className="hidden lg:flex h-screen w-64 fixed left-0 top-0 border-r border-border-subtle/40 dark:border-white/10 flex-col py-6 px-4 bg-surface-panel/80 dark:bg-surface/80 backdrop-blur-xl z-50 overflow-hidden">
+                <div className="mb-8 px-2 flex items-center gap-3 overflow-hidden">
+                    <img src="/logo.png" alt="OptiFlow Logo" className="h-10 w-10 object-contain rounded-xl shadow-lg shrink-0" />
+                    <div className="min-w-0">
+                        <h1 className="font-h3 text-h3 tracking-tighter text-primary truncate">OptiFlow</h1>
+                        <p className="text-[10px] text-on-surface-variant/60 uppercase tracking-widest mt-1 truncate">Cognitive Interface</p>
+                    </div>
                 </div>
                 
                 <nav className="flex-1 space-y-2">
@@ -221,15 +224,6 @@ function App() {
                     <NavItem id="profile" icon="account_circle" label="Developer Profile" />
                 </nav>
 
-                <div className="mt-auto glass-card p-4 rounded-xl flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-surface-container-highest flex-shrink-0 border border-border-subtle">
-                        <img className="w-full h-full object-cover" alt="User Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfKwQkZ4FN3L4WHF70oQOg1yZ16mU0Jr2K288bWeMyXacdgsb4stlZdIzuzDcuGF5lpM6LkYCxeM069_FGvbjI0jeHm8d_BLSd_U7qbVmDnjK8UYyApgFk0qJPJSLyQJnFN1KNHLXKQkIV9tRnVyBE1kIbDIvGmAOaZrL6KvlEGAwh9YI0NON94b7fstLN2-mbdcogaIRIzwroAp_ek8_K1UEfq779hfPRvDTej8m_5PMVzkiFrgKzmnVh-CKXPjKy0W6ThPAg4jdn"/>
-                    </div>
-                    <div className="overflow-hidden">
-                        <p className="font-label-caps text-label-caps text-primary truncate">Alex Rivera</p>
-                        <p className="text-[10px] uppercase font-bold text-on-surface-variant/40 truncate tracking-widest mt-1">Master Tier Pro</p>
-                    </div>
-                </div>
             </aside>
 
             {/* Mobile Nav Bottom Bar */}
@@ -247,8 +241,9 @@ function App() {
                 {/* Top Nav Bar */}
                 <header className="fixed top-0 right-0 left-0 lg:left-64 flex items-center justify-between px-6 lg:px-8 h-20 z-40 bg-surface/60 dark:bg-surface/40 backdrop-blur-md border-b border-border-subtle/40 dark:border-white/10">
                     <div className="flex items-center gap-6">
-                        <div className="lg:hidden block">
-                             <h1 className="font-h3 text-h3 tracking-tighter text-primary">Auralis</h1>
+                        <div className="lg:hidden flex items-center gap-2">
+                             <img src="/logo.png" alt="OptiFlow Logo" className="h-8 w-8 object-contain rounded-lg shadow-sm" />
+                             <h1 className="font-h3 text-h3 tracking-tighter text-primary">OptiFlow</h1>
                         </div>
                         <div className="relative hidden md:block">
                             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60">search</span>
@@ -278,9 +273,6 @@ function App() {
                         
                         <button className="w-10 h-10 flex items-center justify-center rounded-full glass-card text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90">
                             <span className="material-symbols-outlined">notifications</span>
-                        </button>
-                        <button className="w-10 h-10 flex items-center justify-center rounded-full glass-card text-on-surface-variant hover:text-primary transition-colors scale-95 active:scale-90">
-                            <span className="material-symbols-outlined">settings</span>
                         </button>
                     </div>
                 </header>

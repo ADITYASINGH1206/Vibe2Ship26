@@ -107,7 +107,7 @@ const DashboardView = ({ latestAnalytics, masterTaskList, setMasterTaskList, req
                     </div>
                     <div>
                         <p className="font-label-caps text-label-caps text-on-surface-variant mb-1">Habit Streak</p>
-                        <h3 className="font-h3 text-h3 text-primary">14 <span className="text-on-surface-variant/40 text-metric">DAYS</span></h3>
+                        <h3 className="font-h3 text-h3 text-primary">0 <span className="text-on-surface-variant/40 text-metric">DAYS</span></h3>
                     </div>
                     <div className="flex gap-1 mt-2">
                         <div className="h-1 flex-1 bg-primary rounded-full"></div>

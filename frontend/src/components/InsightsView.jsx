@@ -86,13 +86,31 @@ const InsightsView = ({ latestAnalytics, masterTaskList = [] }) => {
     const pois = chartData.filter(d => d.risk > 70);
 
     return (
-        <div className="w-full max-w-4xl mx-auto flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500 bg-slate-950 p-6 rounded-3xl">
+        <div className="w-full max-w-4xl mx-auto flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center gap-4 mb-2 border-b border-border-subtle/50 pb-6">
                 <span className="material-symbols-outlined text-[32px] text-accent-blue">psychology</span>
                 <h2 className="font-h3 text-h3 text-primary">Cognitive Insights</h2>
             </div>
             
-            <div className="w-full mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                <div className="glass-card p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-accent-emerald transition-colors">
+                    <span className="material-symbols-outlined text-accent-emerald mb-2 text-[28px]">speed</span>
+                    <h4 className="font-metric text-3xl text-primary font-bold">94.2%</h4>
+                    <p className="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-widest mt-2">Execution Accuracy</p>
+                </div>
+                <div className="glass-card p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-accent-blue transition-colors">
+                    <span className="material-symbols-outlined text-accent-blue mb-2 text-[28px]">verified_user</span>
+                    <h4 className="font-metric text-3xl text-primary font-bold">99.9%</h4>
+                    <p className="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-widest mt-2">System Stability</p>
+                </div>
+                <div className="glass-card p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-accent-purple transition-colors">
+                    <span className="material-symbols-outlined text-accent-purple mb-2 text-[28px]">auto_graph</span>
+                    <h4 className="font-metric text-3xl text-primary font-bold">8.4<span className="text-lg text-on-surface-variant">/10</span></h4>
+                    <p className="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-widest mt-2">Optimization Quotient</p>
+                </div>
+            </div>
+
+            <div className="w-full">
                 {latestAnalytics?.recommendation ? (
                     <div className="relative p-[1px] rounded-2xl bg-gradient-to-r from-accent-blue via-primary to-accent-purple shadow-[0_0_30px_rgba(0,102,255,0.15)] overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-r from-accent-blue via-primary to-accent-purple blur-2xl opacity-20"></div>
