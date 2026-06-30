@@ -1,7 +1,7 @@
 const DeveloperProfile = () => {
   return (
     <div className="w-full flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-500 relative">
-      
+
       {/* Background ambient light */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full pointer-events-none"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-accent-blue/10 blur-[120px] rounded-full pointer-events-none"></div>
@@ -32,8 +32,8 @@ const DeveloperProfile = () => {
           <p className="font-body-lg text-lg text-on-surface leading-loose max-w-2xl text-center">
             I'm a Full-Stack Developer specializing in high-performance
             web applications and algorithmic trading infrastructure.
-            I bridge the gap between complex market structure strategies—often
-            leveraging custom Pine Script and data-driven backends—and clean, intuitive user interfaces.
+            I bridge the gap between complex market structure strategies often
+            leveraging custom Pine Script and data driven backends and clean, intuitive user interfaces.
             I build the technology that turns raw market data into an actionable edge.
           </p>
         </div>
