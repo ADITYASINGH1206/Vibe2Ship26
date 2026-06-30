@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { analyzeTask } from './services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useLocalStorage } from './hooks/useLocalStorage';
 
 import DashboardView from './components/DashboardView';
 import TaskManagerView from './components/TaskManagerView';
@@ -10,6 +11,7 @@ import InsightsView from './components/InsightsView';
 import BillTrackerView from './components/BillTrackerView';
 import HabitsView from './components/HabitsView';
 import DeveloperProfileView from './components/DeveloperProfileView';
+import BiometricCheckModal from './components/BiometricCheckModal';
 
 const LOADING_PHASES = [
     "Extracting entities & timeline...",
@@ -35,17 +37,48 @@ function App() {
     }, [isDarkMode]);
 
     // Global State
-    const [masterTaskList, setMasterTaskList] = useState([]);
+    const [masterTaskList, setMasterTaskList] = useLocalStorage('vibe2ship_tasks', []);
     const [latestAnalytics, setLatestAnalytics] = useState(null);
-    const [bills, setBills] = useState([
+    const [bills, setBills] = useLocalStorage('vibe2ship_bills', [
         { id: 1, payee: 'Electricity Provider', amount: 120.50, dueDate: new Date(Date.now() + 86400000 * 2).toISOString(), paid: false },
         { id: 2, payee: 'Internet Bill', amount: 79.99, dueDate: new Date(Date.now() - 86400000).toISOString(), paid: false },
     ]);
-    const [habits, setHabits] = useState([
+    const [habits, setHabits] = useLocalStorage('vibe2ship_habits', [
         { id: 1, name: 'Drink 2L Water', completedDays: [] },
         { id: 2, name: 'Read 30 mins', completedDays: [] },
         { id: 3, name: 'Workout', completedDays: [] }
     ]);
+
+    const [isBiometricModalOpen, setIsBiometricModalOpen] = useState(false);
+    const [enforcerTriggeredIds, setEnforcerTriggeredIds] = useState(new Set());
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const now = new Date();
+            masterTaskList.forEach(task => {
+                const startTime = new Date(task.startTime);
+                if (
+                    !enforcerTriggeredIds.has(task.id) && 
+                    Math.abs(now - startTime) < 60000 && // Within a minute
+                    latestAnalytics?.riskScore > 0.5 // High risk threshold for demo
+                ) {
+                    setEnforcerTriggeredIds(prev => new Set(prev).add(task.id));
+                    setIsBiometricModalOpen(true);
+                }
+            });
+        }, 10000); // Check every 10s for simulation
+        
+        return () => clearInterval(interval);
+    }, [masterTaskList, latestAnalytics, enforcerTriggeredIds]);
+
+    const handleBiometricSuccess = () => {
+        if (latestAnalytics) {
+            setLatestAnalytics(prev => ({
+                ...prev,
+                riskScore: Math.max(0.1, prev.riskScore - 0.4) // Dynamically flatten risk curve
+            }));
+        }
+    };
 
     const handleAnalyze = async (taskData) => {
         setLoadingPhase(LOADING_PHASES[0]);
@@ -111,7 +144,7 @@ function App() {
     const renderView = () => {
         switch(activeTab) {
             case 'dashboard':
-                return <DashboardView latestAnalytics={latestAnalytics} masterTaskList={masterTaskList} bills={bills} habits={habits} />;
+                return <DashboardView latestAnalytics={latestAnalytics} masterTaskList={masterTaskList} setMasterTaskList={setMasterTaskList} bills={bills} habits={habits} />;
             case 'tasks':
                 return <TaskManagerView onAnalyze={handleAnalyze} loadingPhase={loadingPhase} masterTaskList={masterTaskList} />;
             case 'calendar':
@@ -125,7 +158,7 @@ function App() {
             case 'profile':
                 return <DeveloperProfileView />;
             default:
-                return <DashboardView latestAnalytics={latestAnalytics} masterTaskList={masterTaskList} bills={bills} habits={habits} />;
+                return <DashboardView latestAnalytics={latestAnalytics} masterTaskList={masterTaskList} setMasterTaskList={setMasterTaskList} bills={bills} habits={habits} />;
         }
     };
 
@@ -148,6 +181,11 @@ function App() {
     return (
         <div className="bg-background text-on-surface font-body-md min-h-screen overflow-x-hidden relative">
             <ToastContainer />
+            <BiometricCheckModal 
+                isOpen={isBiometricModalOpen} 
+                onClose={() => setIsBiometricModalOpen(false)} 
+                onSuccess={handleBiometricSuccess} 
+            />
             
             {/* Atmospheric Orbs */}
             <div className="orb bg-accent-blue w-[40rem] h-[40rem] -top-20 -left-20 animate-pulse"></div>

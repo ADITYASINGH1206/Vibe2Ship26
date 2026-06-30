@@ -36,7 +36,7 @@ const InputBar = ({ onAnalyze, loadingPhase }) => {
                 </div>
                 
                 <div className="flex gap-4">
-                    <div className="relative flex items-center bg-surface-container-low border border-border-subtle rounded-xl px-4 focus-within:border-primary transition-all">
+                    <div className="relative flex items-center bg-surface-container-low border border-border-subtle rounded-xl px-4 focus-within:border-primary transition-all z-50">
                         <Tag className="w-4 h-4 text-on-surface-variant mr-2" />
                         <select 
                             value={category}

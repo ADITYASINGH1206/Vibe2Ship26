@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import RiskMeter from './RiskMeter';
 
-const DashboardView = ({ latestAnalytics, masterTaskList, bills, habits }) => {
+const DashboardView = ({ latestAnalytics, masterTaskList, setMasterTaskList, bills, habits }) => {
+    const [openMenuId, setOpenMenuId] = useState(null);
+
     // Calculate metrics
     const pendingTasks = masterTaskList.length;
     const pendingBills = bills.filter(b => !b.paid).length;
@@ -28,6 +30,19 @@ const DashboardView = ({ latestAnalytics, masterTaskList, bills, habits }) => {
         if (cat === 'urgent') return { icon: 'bolt', text: 'text-accent-purple' };
         if (cat === 'personal') return { icon: 'edit_document', text: 'text-accent-blue' };
         return { icon: 'code', text: 'text-on-surface-variant' };
+    };
+
+    const handleDelete = (objective) => {
+        setMasterTaskList(prev => prev.filter(t => t.objective !== objective));
+        setOpenMenuId(null);
+    };
+
+    const handleEdit = (objective) => {
+        const newName = prompt(`Edit objective name:`, objective);
+        if (newName && newName.trim()) {
+            setMasterTaskList(prev => prev.map(t => t.objective === objective ? { ...t, objective: newName.trim() } : t));
+        }
+        setOpenMenuId(null);
     };
 
     return (
@@ -134,9 +149,20 @@ const DashboardView = ({ latestAnalytics, masterTaskList, bills, habits }) => {
                                                     <p className="font-label-caps text-[10px] text-on-surface-variant mt-1 tracking-widest uppercase">{data.category || 'General'}</p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-4 relative">
                                                 {getRiskBadge(data.riskScore)}
-                                                <button className="opacity-0 group-hover:opacity-100 text-on-surface-variant hover:text-primary transition-all p-2 rounded-full hover:bg-surface-container-highest"><span className="material-symbols-outlined text-[18px]">more_vert</span></button>
+                                                <button 
+                                                    onClick={() => setOpenMenuId(openMenuId === objective ? null : objective)}
+                                                    className="opacity-0 group-hover:opacity-100 focus:opacity-100 text-on-surface-variant hover:text-primary transition-all p-2 rounded-full hover:bg-surface-container-highest"
+                                                >
+                                                    <span className="material-symbols-outlined text-[18px]">more_vert</span>
+                                                </button>
+                                                {openMenuId === objective && (
+                                                    <div className="absolute right-0 top-10 mt-2 w-32 bg-surface border border-border-subtle rounded-xl shadow-lg z-50 overflow-hidden py-1">
+                                                        <button onClick={() => handleEdit(objective)} className="w-full text-left px-4 py-2 hover:bg-surface-container-highest text-sm transition-colors text-on-surface">Edit</button>
+                                                        <button onClick={() => handleDelete(objective)} className="w-full text-left px-4 py-2 hover:bg-error/10 text-error text-sm transition-colors">Delete</button>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                         {/* Subtasks inline */}

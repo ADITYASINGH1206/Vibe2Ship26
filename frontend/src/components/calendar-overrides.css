@@ -1,6 +1,9 @@
 /* Dark theme overrides for react-big-calendar */
 .rbc-calendar {
     color: #e5e7eb; /* Tailwind gray-200 */
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.875rem; /* text-sm */
+    color: #e2e8f0; /* text-slate-200 */
 }
 
 .rbc-month-view, .rbc-time-view, .rbc-agenda-view {
@@ -13,6 +16,9 @@
     border-color: #374151 !important;
     padding: 8px 0;
     font-weight: 600;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.875rem; /* text-sm */
+    color: #e2e8f0; /* text-slate-200 */
 }
 
 .rbc-off-range-bg {
@@ -28,14 +34,17 @@
 }
 
 .rbc-event {
-    background-color: #3b82f6 !important; /* Tailwind blue-500 */
-    border: none !important;
+    background-color: #312e81 !important; /* Tailwind indigo-900 */
+    border: 1px solid #6366f1 !important; /* Tailwind indigo-500 */
     border-radius: 4px;
     padding: 2px 4px;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.875rem; /* text-sm */
+    color: #e2e8f0; /* text-slate-200 */
 }
 
 .rbc-event:hover {
-    background-color: #2563eb !important; /* Tailwind blue-600 */
+    background-color: #4338ca !important; /* Tailwind indigo-700 */
 }
 
 .rbc-toolbar button {
@@ -58,4 +67,7 @@
 
 .rbc-time-gutter {
     color: #9ca3af; /* Tailwind gray-400 */
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.875rem; /* text-sm */
+    color: #e2e8f0; /* text-slate-200 */
 }

@@ -178,4 +178,21 @@
       70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
       100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
   }
+
+  /* DatePicker Overrides to fix overlap and layout */
+  .react-datepicker-popper {
+      z-index: 9999 !important;
+  }
+  .react-datepicker {
+      display: flex !important;
+      flex-direction: row !important;
+  }
+  .react-datepicker__time-container {
+      width: 150px !important;
+      float: none !important;
+  }
+  .react-datepicker__time-list-item {
+      height: auto !important;
+      padding: 8px !important;
+  }
 }
